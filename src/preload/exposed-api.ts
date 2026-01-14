@@ -11,4 +11,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('new-replay', (_, filePath) => callback(filePath));
   },
   getOsuPath: () => ipcRenderer.invoke(IpcChannels.GET_OSU_PATH),
+  invokeAgent: (message: string) => ipcRenderer.invoke(IpcChannels.INVOKE_AGENT, message),
 });

@@ -10,14 +10,64 @@ export default function Analyze() {
     Array<{ id: number; text: string; sender: string }>
   >([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = () => {
-    if (input.trim()) {
-      setMessages([
-        ...messages,
-        { id: Date.now(), text: input, sender: 'You' },
-      ]);
+  const handleSendMessage = async () => {
+    if (input.trim() && !isLoading) {
+      const userMessage = input.trim();
       setInput('');
+      setIsLoading(true);
+
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now(), text: userMessage, sender: 'You' },
+      ]);
+
+      try {
+        const result = await (window as any).electronAPI.invokeAgent(userMessage);
+        console.log('Full result:', result);
+        const lastMessage = result.output[result.output.length - 1];
+        let agentResponse = lastMessage?.content || 'No response content';
+        
+        // Handle structured response format
+        const structuredPrefix = 'Returning structured response: ';
+        if (agentResponse.startsWith(structuredPrefix)) {
+          const jsonString = agentResponse.substring(structuredPrefix.length);
+          try {
+            const parsed = JSON.parse(jsonString);
+            if (typeof parsed === 'object' && parsed.punny_response) {
+              agentResponse = parsed.punny_response;  // Extract the punny response
+            } else {
+              agentResponse = JSON.stringify(parsed, null, 2);  // Fallback to pretty JSON
+            }
+          } catch { }
+        } else {
+          try {
+            const parsed = JSON.parse(agentResponse);
+            if (typeof parsed === 'object' && parsed.punny_response) {
+              agentResponse = parsed.punny_response;
+            } else if (typeof parsed === 'object') {
+              agentResponse = JSON.stringify(parsed, null, 2);
+            }
+          } catch {
+            // Plain text, use as is
+          }
+        }
+        
+        console.log('Final agent response:', agentResponse);
+        setMessages(prev => [
+          ...prev,
+          { id: Date.now() + 1, text: agentResponse, sender: 'Agent' },
+        ]);
+      } catch (error) {
+        console.error('Error invoking agent:', error);
+        setMessages(prev => [
+          ...prev,
+          { id: Date.now() + 1, text: 'Error: Could not get response from agent.', sender: 'Agent' },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -54,6 +104,7 @@ export default function Analyze() {
               </div>
             ))
           )}
+          {isLoading && <p className="loading">Agent is thinking...</p>}
         </div>
 
         {/* Input */}
@@ -65,8 +116,9 @@ export default function Analyze() {
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type a message..."
             className="chat-input"
+            disabled={isLoading}
           />
-          <button onClick={handleSendMessage} className="send-btn">
+          <button onClick={handleSendMessage} className="send-btn" disabled={isLoading}>
             Send
           </button>
         </div>

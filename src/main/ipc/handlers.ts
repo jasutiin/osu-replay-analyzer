@@ -1,6 +1,7 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { IpcChannels } from '../../shared/types';
 import * as chokidar from 'chokidar';
+import { agent } from '../agent/agent'
 
 let watcher: chokidar.FSWatcher | null = null;
 let isWatching = false;
@@ -33,6 +34,16 @@ export const registerIpcHandlers = (mainWindow: BrowserWindow, path: string) => 
     }
     isWatching = false;
     return { success: true };
+  });
+
+  ipcMain.handle(IpcChannels.INVOKE_AGENT, async (_, message: string) => {
+    const config = {
+      configurable: { thread_id: "1" },
+      context: { user_id: "1" },
+    };
+
+    const response = await agent.invoke({ messages: [{ role: "user", content: message }] }, config);
+    return { output: response.messages[response.messages.length - 1].content };
   });
 
   ipcMain.handle(IpcChannels.GET_WATCH_STATUS, () => {

@@ -4,4 +4,5 @@ export enum IpcChannels {
   STOP_WATCHING = 'stop-watching',
   GET_WATCH_STATUS = 'get-watch-status',
   GET_OSU_PATH = 'get-osu-path',
+  INVOKE_AGENT = 'invoke-agent',
 }

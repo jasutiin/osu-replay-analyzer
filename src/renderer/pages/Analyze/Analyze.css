@@ -48,6 +48,11 @@
   color: #555;
 }
 
+.loading {
+  color: #ff66aa;
+  font-style: italic;
+}
+
 .chat-section {
   flex: 1;
   min-width: 300px;
