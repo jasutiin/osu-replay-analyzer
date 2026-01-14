@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useSearch } from '@tanstack/react-router';
 import './Analyze.css';
 
 export default function Analyze() {
+  const search = useSearch({ from: '/analyze' });
+  const fileName = search.file as string | undefined;
+
   const [messages, setMessages] = useState<
     Array<{ id: number; text: string; sender: string }>
   >([]);
@@ -22,6 +26,7 @@ export default function Analyze() {
       {/* Video Section */}
       <div className="video-section">
         <h2>Replay Video</h2>
+        <p>Analyzing: {fileName ? decodeURIComponent(fileName) : 'No file selected'}</p>
         <div className="video-player">Video Player Placeholder</div>
         <div className="replay-stats">
           <h3>Replay Stats</h3>

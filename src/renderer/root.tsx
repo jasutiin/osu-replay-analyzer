@@ -13,11 +13,11 @@ export const Root = () => {
           Upload Replay
         </Link>
         <Link
-          to="/analyze"
+          to="/watch"
           className="nav-link"
           activeProps={{ className: 'nav-link active' }}
         >
-          Analyze
+          Watch
         </Link>
       </nav>
       <div className="outlet">

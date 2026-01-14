@@ -1,0 +1,50 @@
+.watch-container {
+  padding: 20px;
+}
+
+.watch-container h1 {
+  color: #ff66aa;
+}
+
+.watch-container button {
+  background-color: #ff66aa;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+.watch-container button:hover {
+  background-color: #ff4499;
+}
+
+.watch-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.watch-container li {
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.analyze-btn {
+  background-color: #ff66aa;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.analyze-btn:hover {
+  background-color: #ff4499;
+}

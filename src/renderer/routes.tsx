@@ -2,6 +2,7 @@ import { createRootRoute, createRoute } from '@tanstack/react-router';
 import { Root } from './root';
 import Home from './pages/Home/Home';
 import Analyze from './pages/Analyze/Analyze';
+import Watch from './pages/Watch/Watch';
 
 const rootRoute = createRootRoute({
   component: Root,
@@ -19,4 +20,10 @@ const analyzeRoute = createRoute({
   component: Analyze,
 });
 
-export const routeTree = rootRoute.addChildren([indexRoute, analyzeRoute]);
+const watchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/watch',
+  component: Watch,
+});
+
+export const routeTree = rootRoute.addChildren([indexRoute, analyzeRoute, watchRoute]);
