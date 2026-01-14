@@ -1,0 +1,83 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.home-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.home-subtitle {
+  margin-top: 20px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.button-container {
+  margin-top: 40px;
+}
+
+.select-file-btn {
+  padding: 15px 30px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #ff66aa;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.select-file-btn:hover {
+  background-color: #ff4499;
+}
+
+.file-info {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.file-name {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.analyze-btn {
+  margin-top: 20px;
+  padding: 12px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.analyze-btn:hover {
+  background-color: #45a049;
+}
+
+@media (max-width: 768px) {
+  .home-container h1 {
+    font-size: 2rem;
+  }
+
+  .home-subtitle {
+    font-size: 1rem;
+  }
+
+  .select-file-btn,
+  .analyze-btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}

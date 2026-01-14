@@ -1,0 +1,27 @@
+.root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.nav {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 20px;
+  flex-shrink: 0;
+}
+
+.nav-link {
+  margin-right: 20px;
+  text-decoration: none;
+  color: #ff66aa;
+}
+
+.nav-link.active {
+  font-weight: bold;
+}
+
+.outlet {
+  flex: 1;
+  overflow: auto;
+}
