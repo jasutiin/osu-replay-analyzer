@@ -78,8 +78,15 @@ export default function Analyze() {
     }
   };
 
-  const printReplayData = () => {
-    (window as any).electronAPI.printReplayData(replayPath);
+  const printReplayData = async () => {
+    try {
+      const data = await (window as any).electronAPI.printReplayData(
+        replayPath
+      );
+      console.log('Parsed replay data:', data);
+    } catch (error) {
+      console.error('Error fetching replay data:', error);
+    }
   };
 
   return (

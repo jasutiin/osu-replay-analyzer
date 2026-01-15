@@ -34,9 +34,10 @@ export const registerIpcHandlers = (
     }
   });
 
-  ipcMain.handle(IpcChannels.PRINT_REPLAY_DATA, (_, osuPath: string) => {
-    const data: ReplayData = parseOsrFile(osuPath);
+  ipcMain.handle(IpcChannels.PRINT_REPLAY_DATA, async (_, osuPath: string) => {
+    const data: Partial<ReplayData> = await parseOsrFile(osuPath);
     console.log(data.gameMode);
+    return data;
   });
 
   ipcMain.handle(IpcChannels.STOP_WATCHING, () => {
