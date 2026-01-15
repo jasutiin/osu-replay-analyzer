@@ -4,7 +4,8 @@ import './Analyze.css';
 
 export default function Analyze() {
   const search = useSearch({ from: '/analyze' });
-  const fileName = search.file as string | undefined;
+  const fileName = search.replayPath.split('\\').pop();
+  const replayPath = search.replayPath as string | undefined;
 
   const [messages, setMessages] = useState<
     Array<{ id: number; text: string; sender: string }>
@@ -18,17 +19,19 @@ export default function Analyze() {
       setInput('');
       setIsLoading(true);
 
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         { id: Date.now(), text: userMessage, sender: 'You' },
       ]);
 
       try {
-        const result = await (window as any).electronAPI.invokeAgent(userMessage);
+        const result = await (window as any).electronAPI.invokeAgent(
+          userMessage
+        );
         console.log('Full result:', result);
         const lastMessage = result.output[result.output.length - 1];
         let agentResponse = lastMessage?.content || 'No response content';
-        
+
         // Handle structured response format
         const structuredPrefix = 'Returning structured response: ';
         if (agentResponse.startsWith(structuredPrefix)) {
@@ -36,11 +39,11 @@ export default function Analyze() {
           try {
             const parsed = JSON.parse(jsonString);
             if (typeof parsed === 'object' && parsed.punny_response) {
-              agentResponse = parsed.punny_response;  // Extract the punny response
+              agentResponse = parsed.punny_response; // Extract the punny response
             } else {
-              agentResponse = JSON.stringify(parsed, null, 2);  // Fallback to pretty JSON
+              agentResponse = JSON.stringify(parsed, null, 2); // Fallback to pretty JSON
             }
-          } catch { }
+          } catch {}
         } else {
           try {
             const parsed = JSON.parse(agentResponse);
@@ -53,17 +56,21 @@ export default function Analyze() {
             // Plain text, use as is
           }
         }
-        
+
         console.log('Final agent response:', agentResponse);
-        setMessages(prev => [
+        setMessages((prev) => [
           ...prev,
           { id: Date.now() + 1, text: agentResponse, sender: 'Agent' },
         ]);
       } catch (error) {
         console.error('Error invoking agent:', error);
-        setMessages(prev => [
+        setMessages((prev) => [
           ...prev,
-          { id: Date.now() + 1, text: 'Error: Could not get response from agent.', sender: 'Agent' },
+          {
+            id: Date.now() + 1,
+            text: 'Error: Could not get response from agent.',
+            sender: 'Agent',
+          },
         ]);
       } finally {
         setIsLoading(false);
@@ -71,12 +78,19 @@ export default function Analyze() {
     }
   };
 
+  const printReplayData = () => {
+    (window as any).electronAPI.printReplayData(replayPath);
+  };
+
   return (
     <div className="analyze-container">
       {/* Video Section */}
       <div className="video-section">
         <h2>Replay Video</h2>
-        <p>Analyzing: {fileName ? decodeURIComponent(fileName) : 'No file selected'}</p>
+        <p>
+          Analyzing:{' '}
+          {fileName ? decodeURIComponent(fileName) : 'No file selected'}
+        </p>
         <div className="video-player">Video Player Placeholder</div>
         <div className="replay-stats">
           <h3>Replay Stats</h3>
@@ -86,6 +100,8 @@ export default function Analyze() {
           <p>Max Combo: 500x</p>
         </div>
       </div>
+
+      <button onClick={printReplayData}>Print Data</button>
 
       {/* Chat Section */}
       <div className="chat-section">
@@ -118,7 +134,11 @@ export default function Analyze() {
             className="chat-input"
             disabled={isLoading}
           />
-          <button onClick={handleSendMessage} className="send-btn" disabled={isLoading}>
+          <button
+            onClick={handleSendMessage}
+            className="send-btn"
+            disabled={isLoading}
+          >
             Send
           </button>
         </div>

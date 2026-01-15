@@ -1,18 +1,25 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { IpcChannels } from '../../shared/types';
 import * as chokidar from 'chokidar';
-import { agent } from '../agent/agent'
+import { agent } from '../agent/agent';
+import {
+  parseOsrFile,
+  type ReplayData,
+} from '../../utils/replay-parser/parser';
 
 let watcher: chokidar.FSWatcher | null = null;
 let isWatching = false;
 let osuReplaysPath = '';
 
-export const registerIpcHandlers = (mainWindow: BrowserWindow, path: string) => {
+export const registerIpcHandlers = (
+  mainWindow: BrowserWindow,
+  path: string
+) => {
   osuReplaysPath = path;
 
   ipcMain.handle(IpcChannels.START_WATCHING, (_, osuPath: string) => {
     if (isWatching) return { success: false, message: 'Already watching' };
-    
+
     try {
       watcher = chokidar.watch(osuPath, { ignoreInitial: true });
       watcher.on('add', (filePath) => {
@@ -27,6 +34,11 @@ export const registerIpcHandlers = (mainWindow: BrowserWindow, path: string) => 
     }
   });
 
+  ipcMain.handle(IpcChannels.PRINT_REPLAY_DATA, (_, osuPath: string) => {
+    const data: ReplayData = parseOsrFile(osuPath);
+    console.log(data.gameMode);
+  });
+
   ipcMain.handle(IpcChannels.STOP_WATCHING, () => {
     if (watcher) {
       watcher.close();
@@ -38,11 +50,14 @@ export const registerIpcHandlers = (mainWindow: BrowserWindow, path: string) => 
 
   ipcMain.handle(IpcChannels.INVOKE_AGENT, async (_, message: string) => {
     const config = {
-      configurable: { thread_id: "1" },
-      context: { user_id: "1" },
+      configurable: { thread_id: '1' },
+      context: { user_id: '1' },
     };
 
-    const response = await agent.invoke({ messages: [{ role: "user", content: message }] }, config);
+    const response = await agent.invoke(
+      { messages: [{ role: 'user', content: message }] },
+      config
+    );
     return { output: response.messages[response.messages.length - 1].content };
   });
 
@@ -50,5 +65,5 @@ export const registerIpcHandlers = (mainWindow: BrowserWindow, path: string) => 
     return { isWatching };
   });
 
-  ipcMain.handle(IpcChannels.GET_OSU_PATH, () => osuReplaysPath)
+  ipcMain.handle(IpcChannels.GET_OSU_PATH, () => osuReplaysPath);
 };

@@ -17,7 +17,7 @@ export default function Watch() {
 
     // watch for new replays
     (window as any).electronAPI.onNewReplay((filePath: string) => {
-      setReplays(prev => [...prev, filePath]);
+      setReplays((prev) => [...prev, filePath]);
     });
 
     // stop watching for new replays when leaving the page
@@ -27,8 +27,7 @@ export default function Watch() {
   }, []);
 
   const handleAnalyze = (replayPath: string) => {
-    const fileName = replayPath.split('\\').pop();
-    navigate({ to: '/analyze?file=' + encodeURIComponent(fileName) });
+    navigate({ to: '/analyze?replayPath=' + encodeURIComponent(replayPath) });
   };
 
   return (
@@ -39,10 +38,15 @@ export default function Watch() {
         {replays.map((replay, index) => (
           <li key={index}>
             {replay.split('\\').pop()}
-            <button className="analyze-btn" onClick={() => handleAnalyze(replay)}>Analyze</button>
+            <button
+              className="analyze-btn"
+              onClick={() => handleAnalyze(replay)}
+            >
+              Analyze
+            </button>
           </li>
         ))}
       </ul>
     </div>
   );
-};
+}

@@ -5,4 +5,5 @@ export enum IpcChannels {
   GET_WATCH_STATUS = 'get-watch-status',
   GET_OSU_PATH = 'get-osu-path',
   INVOKE_AGENT = 'invoke-agent',
+  PRINT_REPLAY_DATA = 'print-replay-data',
 }

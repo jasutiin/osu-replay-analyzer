@@ -36,14 +36,20 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
-  let osuReplaysPath = path.join(app.getPath('home'), 'AppData', 'Local', 'osu!', 'Replays');
-  
+  let osuReplaysPath = path.join(
+    app.getPath('home'),
+    'AppData',
+    'Local',
+    'osu!',
+    'Replays'
+  );
+
   if (!fs.existsSync(osuReplaysPath)) {
     const result = await dialog.showOpenDialog(null, {
       properties: ['openDirectory'],
-      title: 'Select your osu! Replays folder'
+      title: 'Select your osu! Replays folder',
     });
-    
+
     if (!result.canceled && result.filePaths.length > 0) {
       osuReplaysPath = result.filePaths[0];
       console.log('User selected path:', osuReplaysPath);
