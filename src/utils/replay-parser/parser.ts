@@ -14,7 +14,7 @@ export interface ReplayData {
   numberOfMisses: number;
   totalScore: number;
   maxCombo: number;
-  perfectCombo: boolean;
+  perfectCombo: number;
   mods: number;
   lifeBarGraph: string;
   timestamp: number;
@@ -32,15 +32,9 @@ export async function parseOsrFile(
     const offsetRef = { value: 0x00 };
     replay.gameMode = readByte(offsetRef, buffer);
     replay.gameVersion = readInteger(offsetRef, buffer);
-    replay.beatmapMD5 = 'beatmapMD5 placeholder';
-    replay.playerName = 'playerName placeholder';
-    replay.replayMD5 = 'replayMD5 placeholder';
-
-    ```
-    TODO: all these values are not correct because we didn't increment the offset value
-          for beatmapMD5, playerName, and replayMD5. we need to actually implement a
-          readString() function
-    ```;
+    replay.beatmapMD5 = readString(offsetRef, buffer);
+    replay.playerName = readString(offsetRef, buffer);
+    replay.replayMD5 = readString(offsetRef, buffer);
     replay.numberOf300s = readShort(offsetRef, buffer);
     replay.numberOf100s = readShort(offsetRef, buffer);
     replay.numberOf50s = readShort(offsetRef, buffer);
@@ -48,6 +42,10 @@ export async function parseOsrFile(
     replay.numberOfKatus = readShort(offsetRef, buffer);
     replay.numberOfMisses = readShort(offsetRef, buffer);
     replay.totalScore = readInteger(offsetRef, buffer);
+    replay.maxCombo = readShort(offsetRef, buffer);
+    replay.perfectCombo = readByte(offsetRef, buffer);
+    replay.mods = readInteger(offsetRef, buffer);
+    replay.lifeBarGraph = readString(offsetRef, buffer);
 
     return replay;
   } catch (err) {
@@ -75,6 +73,51 @@ function readInteger(
 ): number {
   const val = buffer.readInt32LE(offset.value);
   offset.value += 4;
+  return val;
+}
+
+function readString(
+  offset: { value: number },
+  buffer: NonSharedBuffer
+): string {
+  if (buffer[offset.value] === 0x00) {
+    offset.value++;
+    return '';
+  } else if (buffer[offset.value] === 0x0b) {
+    offset.value++;
+    const stringLength = readULEB128(offset, buffer);
+    const text = buffer.toString(
+      'utf8',
+      offset.value,
+      offset.value + stringLength
+    );
+    offset.value += stringLength;
+    return text;
+  }
+
+  return '';
+}
+
+// https://github.com/dlang/druntime/blob/0dfc0ce5aef1fde00713b56e9be99dcdfb04d171/src/rt/backtrace/dwarf.d#L490-L534
+function readULEB128(
+  offset: { value: number },
+  buffer: NonSharedBuffer
+): number {
+  let val = 0;
+  let shift = 0;
+  const t = true; // eslint lmao
+
+  while (t) {
+    const byte = buffer[offset.value];
+    val |= (byte & 0x7f) << shift;
+    if ((byte & 0x80) == 0) {
+      offset.value++;
+      break;
+    }
+    shift += 7;
+    offset.value++;
+  }
+
   return val;
 }
 
