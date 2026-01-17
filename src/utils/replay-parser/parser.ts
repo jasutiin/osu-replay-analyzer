@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { parseReplayData } from './lzma';
 
 export interface ReplayData {
   gameMode: number;
@@ -21,6 +22,7 @@ export interface ReplayData {
   replayLength: number;
   replayData: Array<{ time: number; x: number; y: number; keys: number }>;
   onlineScoreId: bigint;
+  rngSeed?: number; // optional rng seed for versions >= 20130319
 }
 
 export async function parseOsrFile(
@@ -49,7 +51,23 @@ export async function parseOsrFile(
     replay.lifeBarGraph = readString(offsetRef, buffer);
     replay.timestamp = readLong(offsetRef, buffer);
     replay.replayLength = readInteger(offsetRef, buffer);
+
+    // extract and parse compressed replay data
+    const compressedReplayData = buffer.subarray(
+      offsetRef.value,
+      offsetRef.value + replay.replayLength,
+    );
     offsetRef.value += replay.replayLength;
+
+    const { replayData, rngSeed } = parseReplayData(
+      compressedReplayData,
+      replay.gameVersion,
+    );
+    replay.replayData = replayData;
+    if (rngSeed !== undefined) {
+      replay.rngSeed = rngSeed;
+    }
+
     replay.onlineScoreId = readLong(offsetRef, buffer);
 
     return replay;
