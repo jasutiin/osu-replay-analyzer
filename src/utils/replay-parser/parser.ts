@@ -17,13 +17,14 @@ export interface ReplayData {
   perfectCombo: number;
   mods: number;
   lifeBarGraph: string;
-  timestamp: number;
+  timestamp: bigint;
   replayLength: number;
   replayData: Array<{ time: number; x: number; y: number; keys: number }>;
+  onlineScoreId: bigint;
 }
 
 export async function parseOsrFile(
-  filePath: string
+  filePath: string,
 ): Promise<Partial<ReplayData>> {
   try {
     const buffer = fs.readFileSync(filePath.trim());
@@ -46,6 +47,10 @@ export async function parseOsrFile(
     replay.perfectCombo = readByte(offsetRef, buffer);
     replay.mods = readInteger(offsetRef, buffer);
     replay.lifeBarGraph = readString(offsetRef, buffer);
+    replay.timestamp = readLong(offsetRef, buffer);
+    replay.replayLength = readInteger(offsetRef, buffer);
+    offsetRef.value += replay.replayLength;
+    replay.onlineScoreId = readLong(offsetRef, buffer);
 
     return replay;
   } catch (err) {
@@ -69,16 +74,22 @@ function readShort(offset: { value: number }, buffer: NonSharedBuffer): number {
 
 function readInteger(
   offset: { value: number },
-  buffer: NonSharedBuffer
+  buffer: NonSharedBuffer,
 ): number {
   const val = buffer.readInt32LE(offset.value);
   offset.value += 4;
   return val;
 }
 
+function readLong(offset: { value: number }, buffer: NonSharedBuffer): bigint {
+  const val = buffer.readBigInt64LE(offset.value);
+  offset.value += 8;
+  return val;
+}
+
 function readString(
   offset: { value: number },
-  buffer: NonSharedBuffer
+  buffer: NonSharedBuffer,
 ): string {
   if (buffer[offset.value] === 0x00) {
     offset.value++;
@@ -89,7 +100,7 @@ function readString(
     const text = buffer.toString(
       'utf8',
       offset.value,
-      offset.value + stringLength
+      offset.value + stringLength,
     );
     offset.value += stringLength;
     return text;
@@ -101,7 +112,7 @@ function readString(
 // https://github.com/dlang/druntime/blob/0dfc0ce5aef1fde00713b56e9be99dcdfb04d171/src/rt/backtrace/dwarf.d#L490-L534
 function readULEB128(
   offset: { value: number },
-  buffer: NonSharedBuffer
+  buffer: NonSharedBuffer,
 ): number {
   let val = 0;
   let shift = 0;
