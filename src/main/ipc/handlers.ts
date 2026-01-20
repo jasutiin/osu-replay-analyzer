@@ -6,6 +6,7 @@ import {
   parseOsrFile,
   type ReplayData,
 } from '../../utils/replay-parser/parser';
+import store from '../store';
 
 let watcher: chokidar.FSWatcher | null = null;
 let isWatching = false;
@@ -13,7 +14,7 @@ let osuReplaysPath = '';
 
 export const registerIpcHandlers = (
   mainWindow: BrowserWindow,
-  path: string
+  path: string,
 ) => {
   osuReplaysPath = path;
 
@@ -25,6 +26,7 @@ export const registerIpcHandlers = (
       watcher.on('add', (filePath) => {
         if (filePath.endsWith('.osr')) {
           mainWindow.webContents.send('new-replay', filePath);
+          store.set('current-replay', filePath);
         }
       });
       isWatching = true;
@@ -57,7 +59,7 @@ export const registerIpcHandlers = (
 
     const response = await agent.invoke(
       { messages: [{ role: 'user', content: message }] },
-      config
+      config,
     );
     return { output: response.messages[response.messages.length - 1].content };
   });
